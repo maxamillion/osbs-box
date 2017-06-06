@@ -23,14 +23,6 @@ Additional components:
 ### Koji DB
 https://docs.pagure.org/koji/server_howto/#postgresql-server
 
-### Openshift
-https://docs.openshift.org/latest/getting_started/administrators.html#running-in-a-docker-container
-
-Uses workstation's network.
-Access console via https://localhost:8443
-Username: osbs
-Password: osbs
-
 ### Shared Data
 A data volume container used to store shared data between
 the containers:
@@ -43,15 +35,35 @@ Combination of client tools used to interact with other services
 * koji-cli
 * koji-containerbuild-cli
 
+## Openshift
+A working OpenShift cluster is needed for full functionality.
+It's recommended to set one up via
+[`oc cluster up`](https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md)
+
+See Getting Started section below for commands.
+
+Once configured, console can be accessed via https://localhost:8443
+Username: osbs
+Password: osbs
+Namespace: osbs
 
 ## Getting Started
 
 ```
+# Setup OpenShift locally
+oc cluster up --version v1.4.1 --image openshift/origin
+oc login -u system:admin
+# Ok to do this even before namespace is created
+oc -n osbs adm policy add-cluster-role-to-user cluster-admin osbs
+
 # Build all images
 docker-compose build
 
 # Start all containers in foreground
 docker-compose up (Use -d for detached mode)
+
+# Alternativaly, combine both commands
+docker-compose up --build -d
 
 # Wait for client container to start
 
@@ -69,6 +81,9 @@ docker-compose down
 koji-containerbuild container-build candidate \
     git://my-git-registry.com/my-git-repo#4c16bf82213a94fb576cefe996fe70c5e384282f
 ```
+
+It's imporant to always pass a repo-url, otherwise the yum repo for the koji destination tag
+will be attempted, which is not yet supported.
 
 ## Using Koji CLI
 
@@ -118,4 +133,3 @@ sudo iptables -F
 sudo iptables -t nat -F
 sudo systemctl start docker
 ```
-

@@ -3,6 +3,8 @@ MAINTAINER Luiz Carvalho <lucarval@redhat.com>
 
 COPY yum.repos.d/ /etc/yum.repos.d/
 
+RUN yum -y install epel-release
+
 # Latest mock pacakge build's dependencies are broken,
 # hard-coded to a previous working version instead.
 # Should be removed once resolved.

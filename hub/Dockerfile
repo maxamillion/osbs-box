@@ -1,9 +1,11 @@
 FROM centos:7
 MAINTAINER Luiz Carvalho <lucarval@redhat.com>
 
-EXPOSE 80 443
+EXPOSE 8080 8083
 
 COPY yum.repos.d/ /etc/yum.repos.d/
+
+RUN yum -y install epel-release
 
 RUN \
     yum -y install \
