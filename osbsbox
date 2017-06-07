@@ -1,0 +1,160 @@
+#!/bin/bash
+#
+# osbsbox
+#
+# Description
+#
+# This is a simple control script in order to easily setup both 'oc docker up'
+# and docker-compose components of osbs-box
+#
+#
+# Error Codes:
+#   1 - A dependency is missing
+#   2 - Invalid arg passed
+#   3 - Invalid command passed, or command missing
+
+f_ctrl_c() {
+    printf "\n*** Exiting ***\n"
+    exit $?
+}
+# trap int (ctrl-c)
+trap f_ctrl_c SIGINT
+
+f_help() {
+    cat <<EOF
+
+NAME
+    osbsbox
+
+SYNOPSIS
+    osbsbox [up|down] [-h] [-v] [-d]
+
+DESCRIPTION
+    This is a simple control script in order to easily setup both 'oc docker up'
+    and docker-compose components of osbs-box. By default it will launch these
+    in a detached mode and will provide no output.
+
+OPTIONS
+    -h
+        Display this help message
+    -v
+        Verbose mode, this will show 'oc cluster up' output and will
+    -d
+        Run docker-compose in detached mode
+
+EXAMPLE
+    osbsbox up -v
+
+    osbsbox down -v
+
+EOF
+}
+
+# Slight sanity checking
+if [[ "${EUID}" -ne "0" ]]; then
+    printf "ERROR: script must be run as root or with sudo."
+    exit 1
+fi
+if ! docker &> /dev/null; then
+    printf "ERROR: docker command not found\n" >&2
+    exit 1
+fi
+if ! docker-compose --help &> /dev/null; then
+    printf "ERROR: docker-compose command not found\n" >&2
+    exit 1
+fi
+if ! oc &> /dev/null; then
+    printf "ERROR: oc command not found\n" >&2
+    exit 1
+fi
+
+# Define "global" variables
+f_return=""     # This is a "special" variable which will be used to return data
+                # from a function call
+
+verbose=""      # If this is a non-zero-length string, then we'll be verbose
+detached=""     # If this is a non-zero-length string, then detach docker-compose
+
+cmd="${1}"
+shift 1
+
+# input validation
+if [[ -z "${cmd}" ]]; then
+    printf "ERROR: No command specified\n"
+    f_help
+    exit 3
+fi
+if ! [[ "${cmd}" =~ [up|down] ]]; then
+    printf "ERROR: Invalid command specified: ${1}\n"
+    f_help
+    exit 3
+fi
+
+# parse options/args
+while getopts ":hvud" opt; do
+    case ${opt} in
+        h)
+            f_help
+            exit 0
+        ;;
+        v)
+            verbose="true"
+        ;;
+        d)
+            detached="true"
+        ;;
+        \?)
+            printf "ERROR: INVALID ARG ${OPTARG}\n"
+            f_help
+            exit 2
+        ;;
+        *)
+            printf "ERROR: INVALID ARG ${OPTARG}\n"
+            f_help
+            exit 2
+        ;;
+    esac
+done
+
+# f_run_cmd
+#
+# Function to actually run the command and handle output verbosity
+f_run_cmd() {
+
+
+    if [[ -z "${verbose}" ]]; then
+        ${1} &> /dev/null
+    else
+        ${1}
+    fi
+
+    f_return="$?"
+}
+
+if [[ "${cmd}" == "up" ]]; then
+    # Bring the OpenShift cluster up
+    f_run_cmd "oc cluster up"
+
+    if [[ ${f_return} -eq "0" ]]; then
+
+        # Setup
+        f_run_cmd "oc login -u system:admin"
+        f_run_cmd "oc -n osbs adm policy add-cluster-role-to-user cluster-admin osbs"
+
+        if [[ ${f_return} -eq "0" ]]; then
+            # Run docker-compose
+            if [[ -n "${detached}" ]]; then
+                f_run_cmd "docker-compose up --build -d"
+            else
+                f_run_cmd "docker-compose up --build"
+            fi
+        fi
+    fi
+
+elif [[ "${cmd}" == "down" ]]; then
+    f_run_cmd "oc cluster down"
+    f_run_cmd "docker-compose down"
+
+fi
+
+# vim: set expandtab syntax=sh sw=4 sts=4 ts=4 autoindent:

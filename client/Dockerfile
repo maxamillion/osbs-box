@@ -3,8 +3,9 @@ MAINTAINER Luiz Carvalho <lucarval@redhat.com>
 
 COPY yum.repos.d/ /etc/yum.repos.d/
 
-RUN \
-    yum install -y centos-release-openshift-origin13
+RUN yum install -y \
+    centos-release-openshift-origin13 \
+    epel-release
 
 RUN yum install -y \
     origin-clients \

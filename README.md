@@ -50,28 +50,15 @@ Namespace: osbs
 ## Getting Started
 
 ```
-# Setup OpenShift locally
-oc cluster up --version v1.4.1 --image openshift/origin
-oc login -u system:admin
-# Ok to do this even before namespace is created
-oc -n osbs adm policy add-cluster-role-to-user cluster-admin osbs
+# Run the control script (verbose output recommended)
 
-# Build all images
-docker-compose build
+./osbsbox up -v
 
-# Start all containers in foreground
-docker-compose up (Use -d for detached mode)
 
-# Alternativaly, combine both commands
-docker-compose up --build -d
+# To bring it all back down
 
-# Wait for client container to start
+./osbsbox down -v
 
-# Attach to client container
-docker exec -it osbsbox_koji-client_1 bash
-
-# Stop and remove all containers
-docker-compose down
 ```
 
 ## Submitting Builds
