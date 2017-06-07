@@ -133,7 +133,7 @@ f_run_cmd() {
 
 if [[ "${cmd}" == "up" ]]; then
     # Bring the OpenShift cluster up
-    f_run_cmd "oc cluster up"
+    f_run_cmd "oc cluster up --version v1.4.1 --image openshift/origin"
 
     if [[ ${f_return} -eq "0" ]]; then
 
@@ -152,8 +152,8 @@ if [[ "${cmd}" == "up" ]]; then
     fi
 
 elif [[ "${cmd}" == "down" ]]; then
-    f_run_cmd "oc cluster down"
     f_run_cmd "docker-compose down"
+    f_run_cmd "oc cluster down"
 
 fi
 

@@ -64,9 +64,9 @@ Namespace: osbs
 ## Submitting Builds
 
 ```
-# On client container
+# On client container - run a build using your github space (exmaple)
 koji-containerbuild container-build candidate \
-    git://my-git-registry.com/my-git-repo#4c16bf82213a94fb576cefe996fe70c5e384282f
+    git+https://github.com/myuser/mygitrepo#4c16bf82213a94fb576cefe996fe70c5e384282f
 ```
 
 It's imporant to always pass a repo-url, otherwise the yum repo for the koji destination tag
