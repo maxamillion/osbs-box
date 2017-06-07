@@ -142,11 +142,17 @@ if [[ "${cmd}" == "up" ]]; then
         f_run_cmd "oc -n osbs adm policy add-cluster-role-to-user cluster-admin osbs"
 
         if [[ ${f_return} -eq "0" ]]; then
-            # Run docker-compose
-            if [[ -n "${detached}" ]]; then
-                f_run_cmd "docker-compose up --build -d"
-            else
-                f_run_cmd "docker-compose up --build"
+
+            # Build the buildroot image in OpenShift
+            f_run_cmd "oc ex dockerbuild buildroot/ buildroot:latest"
+
+            if [[ ${f_return} -eq "0" ]]; then
+                # Run docker-compose
+                if [[ -n "${detached}" ]]; then
+                    f_run_cmd "docker-compose up --build -d"
+                else
+                    f_run_cmd "docker-compose up --build"
+                fi
             fi
         fi
     fi
