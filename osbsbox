@@ -144,7 +144,7 @@ if [[ "${cmd}" == "up" ]]; then
         if [[ ${f_return} -eq "0" ]]; then
 
             # Build the buildroot image in OpenShift
-            f_run_cmd "oc ex dockerbuild buildroot/ buildroot:latest"
+            f_run_cmd "oc new-build --strategy=docker https://github.com/maxamillion/osbs-box-atomic-reactor-buildroot.git --to buildroot"
 
             if [[ ${f_return} -eq "0" ]]; then
                 # Run docker-compose
