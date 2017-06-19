@@ -69,4 +69,10 @@ sed --follow-symlinks -i "s/OSBS_TOKEN/${token}/" /etc/osbs.conf
 sed --follow-symlinks -i "s/KOJI_HUB_IP/${WORKSTATION_IP}/" /etc/osbs.conf
 sed --follow-symlinks -i "s/OPENSHIFT_IP/${WORKSTATION_IP}/" /etc/osbs.conf
 
+# Create the buildroot image inside openshift
+oc new-build \
+    --strategy=docker \
+    https://github.com/maxamillion/osbs-box-atomic-reactor-buildroot.git \
+    --to buildroot
+
 exec "$@"
