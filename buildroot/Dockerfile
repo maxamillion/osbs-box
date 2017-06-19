@@ -1,23 +1,16 @@
-FROM centos:7
+FROM fedora:25
 
-RUN yum -y install \
-    centos-release-openshift-origin14 \
-    epel-release
+RUN dnf -y update && dnf clean all
 
-RUN yum -y install \
+RUN dnf -y install \
     docker \
     git \
-    python-docker-py \
-    python-setuptools \
     e2fsprogs \
     koji \
-    python-backports-lzma \
     osbs-client \
     gssproxy \
     fedpkg \
-    python-docker-squash \
     atomic-reactor \
-    python-atomic-reactor* \
-    && yum clean all
+    && dnf clean all
 
-CMD ["python", "/usr/bin/atomic-reactor", "--verbose", "inside-build"]
+CMD ["/usr/bin/atomic-reactor", "--verbose", "inside-build"]
